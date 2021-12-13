@@ -103,9 +103,9 @@ class GxiPy(ICamera):
                                                options=list(self.Gain.keys(), 
                                                             editable=True))
         else:
-            parameters["Exposure time"] = NumberParameter(value=10e-3,
-                                                        valueLimits=(100e-6, 1),
-                                                        unit="s",
+            parameters["Exposure time"] = NumberParameter(value=1,
+                                                        valueLimits=(1, 10000),
+                                                        unit="ms",
                                                         editable=True)
             parameters["Gain"] = NumberParameter(value=0,
                                                         valueLimits=(0, 20),
@@ -138,6 +138,7 @@ class GxiPy(ICamera):
     def changeParameter(self, name: str, value: Any) -> None:
         if name == "Exposure time":
             value = (self.msExposure[value] if platform.startswith("win") else value)
+            print("Exposuretime: "+str(value))
             self.cam.ExposureTime.set(value*1000)
         elif name == "Gain":
             value = (self.Gain[value] if platform.startswith("win") else value)
