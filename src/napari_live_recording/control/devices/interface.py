@@ -7,6 +7,8 @@ from typing import Dict, List, Any
 from dataclasses import dataclass, replace
 from abc import ABC
 
+#import napari_live_recording.control.devices.gxipyapi
+
 # the camera interface and setting management is heavily inspired by the work of Xavier Casas Moreno in ImSwitch
 # reference work: https://github.com/kasasxav/ImSwitch/blob/master/imswitch/imcontrol/model/managers/detectors/DetectorManager.py
 # Xavier Casas Moreno GitHub profile: https://github.com/kasasxav
