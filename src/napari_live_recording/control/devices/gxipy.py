@@ -32,6 +32,13 @@ class GxiPy(ICamera):
         "244.1 us": -12,
         "122.1 us": -13
     }
+    Gain = {
+        "0": 0,
+        "5": 5, 
+        "10": 10,
+        "15": 15,
+        "20": 20
+    }
 
     pixelFormats = {
         "RGB" : cv2.COLOR_BGR2RGB, # default
@@ -50,14 +57,14 @@ class GxiPy(ICamera):
 
 
         # create a device manager
-        device_manager = gx.DeviceManager()
-        dev_num, dev_info_list = device_manager.update_device_list()
-        if dev_num == 0:
+        self.device_manager = gx.DeviceManager()
+        self.dev_num, dev_info_list = self.device_manager.update_device_list()
+        if self.dev_num == 0:
             print("Number of enumerated devices is 0")
             return
 
         # open the first device
-        self.cam = device_manager.open_device_by_index(1)
+        self.cam = self.device_manager.open_device_by_index(1)
 
         binning = 4
         self.cam.BinningHorizontal.set(binning)
@@ -76,8 +83,8 @@ class GxiPy(ICamera):
         self.cam.stream_on()
 
         # read GxiPy parameters
-        width = 100# int(self.__capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = 100#int(self.__capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        width = self.cam.Width.get() 
+        height = self.cam.Height.get() 
         
         # initialize region of interest
         # steps for height, width and offsets
@@ -92,11 +99,19 @@ class GxiPy(ICamera):
             parameters["Exposure time"] = ListParameter(value=self.msExposure["15.6 ms"], 
                                                         options=list(self.msExposure.keys()), 
                                                         editable=True)
+            parameters["Gain"] = ListParameter(value=self.Gain["0"], 
+                                               options=list(self.Gain.keys(), 
+                                                            editable=True))
         else:
             parameters["Exposure time"] = NumberParameter(value=10e-3,
                                                         valueLimits=(100e-6, 1),
                                                         unit="s",
                                                         editable=True)
+            parameters["Gain"] = NumberParameter(value=0,
+                                                        valueLimits=(0, 20),
+                                                        unit="a.U.",
+                                                        editable=True)
+            
         parameters["Pixel format"] = ListParameter(value=self.pixelFormats["RGB"],
                                                 options=list(self.pixelFormats.keys()),
                                                 editable=True)
@@ -114,15 +129,19 @@ class GxiPy(ICamera):
     
         # create numpy array with data from raw image
         numpy_image = raw_image.get_numpy_array()
-    
+        if numpy_image is None:
+            print("No frame available..")
+            return
     
         return numpy_image
     
     def changeParameter(self, name: str, value: Any) -> None:
         if name == "Exposure time":
             value = (self.msExposure[value] if platform.startswith("win") else value)
-            print(value)#
-            #self.__capture.set(cv2.CAP_PROP_EXPOSURE, value)
+            self.cam.ExposureTime.set(value*1000)
+        elif name == "Gain":
+            value = (self.Gain[value] if platform.startswith("win") else value)
+            self.cam.Gain.set(value)
         elif name == "Pixel format":
             pass #self.__format = self.pixelFormats[value]
         else:

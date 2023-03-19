@@ -147,7 +147,7 @@ class LabeledSlider(LocalWidget):
             unit (str, optional): parameter unit measure. Defaults to "".
             orientation (str, optional): label orientation on the layout. Defaults to "left".
         """
-        if any(type(param) == float):
+        if (type(param) == float):
             self.__slider = QLabeledDoubleSlider(Qt.Horizontal)
         else:
             self.__slider = QLabeledSlider(Qt.Horizontal)
